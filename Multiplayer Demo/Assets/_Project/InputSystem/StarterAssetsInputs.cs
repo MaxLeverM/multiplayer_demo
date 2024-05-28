@@ -43,6 +43,11 @@ namespace StarterAssets
 		{
 			SprintInput(value.isPressed);
 		}
+
+		public void OnFire(InputValue value)
+		{
+			Debug.Log("Fire");
+		}
 #endif
 
 
