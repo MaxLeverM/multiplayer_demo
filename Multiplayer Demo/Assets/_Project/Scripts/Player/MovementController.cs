@@ -1,13 +1,14 @@
 ﻿using System;
+using Mirror;
 using UnityEngine;
 
 namespace Gameplay
 {
-    [Serializable]
-    public class MovementController
+    [RequireComponent(typeof(CharacterController))]
+    public class MovementController : NetworkBehaviour
     {
         [Tooltip("Move speed of the character in m/s")]
-        [SerializeField] private float MoveSpeed = 100.0f;
+        [SerializeField] public float MoveSpeed = 2.0f;
         [Tooltip("Sprint speed of the character in m/s")]
         [SerializeField] private float SprintSpeed = 5.335f;
         [Tooltip("How fast the character turns to face movement direction")]
@@ -36,9 +37,7 @@ namespace Gameplay
         public event Action<float> OnAnimationBlendChanged;
         public event Action<float> OnInputMagnitudeChanged;
         
-        [SerializeField] private Transform _transform;
         [SerializeField] private CharacterController _controller;
-        [SerializeField] private StarterAssetsInputs _input;
         private Camera _mainCamera;
 
         private float _speed;
@@ -47,7 +46,7 @@ namespace Gameplay
         private float _rotationVelocity;
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
-        private bool _isGrounded = true;
+        [SyncVar] private bool _isGrounded = true;
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
         
@@ -56,20 +55,23 @@ namespace Gameplay
         public float GetGroundedRadius => GroundedRadius;
 
         public bool IsGrounded => _isGrounded;
+        
+        public bool InputJump { get; set; }
+        public bool InputSprint { get; set; }
+        public Vector2 InputMove { get; set; }
 
-        public MovementController()
+        private void Awake()
         {
+            _mainCamera = Camera.main;
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
         }
 
-        public void SetCamera(Camera camera)
+        private void Update()
         {
-            _mainCamera = camera;
-        }
-
-        public void Update()
-        {
+            if(!isLocalPlayer)
+                return;
+            
             JumpAndGravity();
             GroundedCheck();
             Move();
@@ -77,7 +79,7 @@ namespace Gameplay
         
         private void GroundedCheck()
         {
-            Vector3 spherePosition = new Vector3(_transform.position.x, _transform.position.y - GroundedOffset, _transform.position.z);
+            Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
             _isGrounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
 
             OnGroundedStateChanged?.Invoke(_isGrounded);
@@ -85,15 +87,15 @@ namespace Gameplay
         
         private void Move()
         {
-            float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+            float targetSpeed = InputSprint ? SprintSpeed : MoveSpeed;
             
-            if (_input.move == Vector2.zero) 
+            if (InputMove == Vector2.zero) 
                 targetSpeed = 0.0f;
             
             float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
 
             float speedOffset = 0.1f;
-            float inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
+            float inputMagnitude = 1f;
             
             if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
             {
@@ -109,14 +111,14 @@ namespace Gameplay
             if (_animationBlend < 0.01f) 
                 _animationBlend = 0f;
             
-            Vector3 inputDirection = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
+            Vector3 inputDirection = new Vector3(InputMove.x, 0.0f, InputMove.y).normalized;
             
-            if (_input.move != Vector2.zero)
+            if (InputMove != Vector2.zero)
             {
                 _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + _mainCamera.transform.eulerAngles.y;
-                float rotation = Mathf.SmoothDampAngle(_transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
+                float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity, RotationSmoothTime);
                 
-                _transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+                transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
             }
 
 
@@ -143,7 +145,7 @@ namespace Gameplay
                     _verticalVelocity = -2f;
                 }
                 
-                if (_input.jump && _jumpTimeoutDelta <= 0.0f)
+                if (InputJump && _jumpTimeoutDelta <= 0.0f)
                 {
                     _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
                     
@@ -168,7 +170,7 @@ namespace Gameplay
                     OnFreeFallStateChanged?.Invoke(true);
                 }
                 
-                _input.jump = false;
+                InputJump = false;
             }
             
             if (_verticalVelocity < _terminalVelocity)

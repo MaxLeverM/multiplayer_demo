@@ -1,13 +1,10 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Gameplay
 {
-    [Serializable]
-    public class CameraController
+    public class PlayerCameraController : MonoBehaviour
     {
-        private readonly StarterAssetsInputs _input;
-        private readonly GameObject _cameraTarget;
+        [SerializeField] private Transform _cameraTarget;
 
         [Tooltip("How far in degrees can you move the camera up")]
         public float TopClamp = 70.0f;
@@ -26,24 +23,25 @@ namespace Gameplay
         
         private const float _threshold = 0.01f;
 
-        public CameraController(StarterAssetsInputs input, GameObject cameraTarget)
+        public Transform CameraTarget => _cameraTarget;
+        
+        public Vector2 LookDirection { get; set; }
+        private void Awake()
         {
-            _input = input;
-            _cameraTarget = cameraTarget;
             _cinemachineTargetYaw = _cameraTarget.transform.rotation.eulerAngles.y;
         }
 
-        public void Update()
+        private void LateUpdate()
         {
             CameraRotation();
         }
 
         private void CameraRotation()
         {
-            if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
+            if (LookDirection.sqrMagnitude >= _threshold && !LockCameraPosition)
             {
-                _cinemachineTargetYaw += _input.look.x;
-                _cinemachineTargetPitch += _input.look.y;
+                _cinemachineTargetYaw += LookDirection.x;
+                _cinemachineTargetPitch += LookDirection.y;
             }
             
             _cinemachineTargetYaw = ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);

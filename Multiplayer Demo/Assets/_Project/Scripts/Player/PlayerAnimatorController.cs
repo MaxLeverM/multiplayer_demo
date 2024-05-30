@@ -1,25 +1,23 @@
 ﻿using System;
+using Mirror;
 using UnityEngine;
 
 namespace Gameplay
 {
     [Serializable]
-    public class PlayerAnimatorController : IDisposable
+    public class PlayerAnimatorController : NetworkBehaviour
     {
-        private readonly Animator _animator;
-        private readonly MovementController _movementController;
+        [SerializeField] private Animator _animator;
+        [SerializeField] private MovementController _movementController;
 
-        private int _animIDSpeed;
+        private int _animIDSpeed; //рефакторинг
         private int _animIDGrounded;
         private int _animIDJump;
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
 
-        public PlayerAnimatorController(Animator animator, MovementController movementController)
+        private void Awake()
         {
-            _animator = animator;
-            _movementController = movementController;
-
             AssignAnimationIDs();
             SubscribeOnMovement();
             
