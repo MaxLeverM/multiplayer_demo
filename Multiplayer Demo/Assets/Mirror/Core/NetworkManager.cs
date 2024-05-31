@@ -616,16 +616,6 @@ namespace Mirror
                 authenticator.OnStopServer();
             }
 
-            // Get Network Manager out of DDOL before going to offline scene
-            // to avoid collision and let a fresh Network Manager be created.
-            // IMPORTANT: .gameObject can be null if StopClient is called from
-            //            OnApplicationQuit or from tests!
-            if (gameObject != null
-                && gameObject.scene.name == "DontDestroyOnLoad"
-                && !string.IsNullOrWhiteSpace(offlineScene)
-                && SceneManager.GetActiveScene().path != offlineScene)
-                SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
-
             OnStopServer();
 
             //Debug.Log("NetworkManager StopServer");
@@ -1314,16 +1304,6 @@ namespace Mirror
 
             // Exit here if we're now in ServerOnly mode (StopClient called in Host mode).
             if (mode == NetworkManagerMode.ServerOnly) return;
-
-            // Get Network Manager out of DDOL before going to offline scene
-            // to avoid collision and let a fresh Network Manager be created.
-            // IMPORTANT: .gameObject can be null if StopClient is called from
-            //            OnApplicationQuit or from tests!
-            if (gameObject != null
-                && gameObject.scene.name == "DontDestroyOnLoad"
-                && !string.IsNullOrWhiteSpace(offlineScene)
-                && SceneManager.GetActiveScene().path != offlineScene)
-                SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
 
             // If StopHost called in Host mode, StopServer will change scenes after this.
             // Check loadingSceneAsync to ensure we don't double-invoke the scene change.

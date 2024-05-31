@@ -3,11 +3,12 @@ using Zenject;
 
 namespace Gameplay.Installers
 {
-    public class InputInstaller : MonoInstaller
+    public class GameInstaller : MonoInstaller
     {
         [SerializeField] private InputController _inputControllerPrefab;
         [SerializeField] private CinemachineCameraController _cameraControllerPrefab;
         [SerializeField] private GameObject _playerPrefab;
+        [SerializeField] private PlayerSpawnPositions _playerSpawnPositions;
         public const string PlayerPrefabID = "PlayerPrefab";
         public override void InstallBindings()
         {
@@ -15,9 +16,12 @@ namespace Gameplay.Installers
             
             Container.Bind<GameObject>().WithId(PlayerPrefabID).FromInstance(_playerPrefab);
             Container.BindFactory<Player, Player.Factory>().FromComponentInNewPrefab(_playerPrefab);
-            Container.Bind<PlayerSpawner>().AsSingle().NonLazy();
+            Container.BindInterfacesTo<PlayerSpawner>().AsSingle();
 
             Container.Bind<CinemachineCameraController>().FromComponentInNewPrefab(_cameraControllerPrefab).AsSingle();
+
+            Container.BindInterfacesAndSelfTo<PlayerSpawnPositions>().FromInstance(_playerSpawnPositions).AsSingle();
+            Container.BindInterfacesAndSelfTo<PlayerDeathHandler>().AsSingle();
         }
     }
 }

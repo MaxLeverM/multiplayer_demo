@@ -4,45 +4,82 @@ using UnityEngine;
 
 namespace Gameplay
 {
-    public class Health : NetworkBehaviour
+    public class Health : NetworkBehaviour, IDeathable<Health>
+
     {
-        [SerializeField] [SyncVar] private int _maxHealth;
-        [SerializeField] [SyncVar] private int _health;
+    [SerializeField] [SyncVar] private int _maxHealth;
 
-        public event Action OnDeath;
+    [SerializeField] [SyncVar(hook = nameof(UpdateHealth))]
+    private int _health;
 
-        public void MakeDamage(int points)
+    public int MaxHealth => _maxHealth;
+    public ReactiveProperty<int> HealthPoints;
+    public event Action<Health> OnDeath;
+
+    private void Awake()
+    {
+        UpdateHealth(_health);
+    }
+
+    [Server]
+    public void MakeDamage(int points)
+    {
+        ChangeHealth(-Mathf.Abs(points));
+    }
+
+    [Server]
+    public void RestoreHealth(int points)
+    {
+        ChangeHealth(Mathf.Abs(points));
+    }
+
+    [Server]
+    public void ChangeHealth(int points)
+    {
+        if (!isServer)
+            return;
+
+        _health += points;
+        if (_health >= _maxHealth)
         {
-            if (!isServer)
-                return;
+            _health = _maxHealth;
+        }
 
-            if (points <= 0)
-                return;
+        if (_health <= 0)
+        {
+            _health = 0;
+            OnDeath?.Invoke(this);
+        }
 
-            _health -= points;
+        UpdateHealth(_health);
+    }
 
-            if (_health <= 0)
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            if (isLocalPlayer)
             {
-                _health = 0;
-                OnDeath?.Invoke();
+                CmdTakeHealth(10);
             }
         }
+    }
 
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.K))
-            {
-                if (isLocalPlayer)
-                {
-                    CmdTakeHealth(10);
-                }
-            }
-        }
-        
-        [Command]
-        void CmdTakeHealth(int value)
-        {
-            MakeDamage(value);
-        }
+    [Command]
+    public void CmdTakeHealth(int value)
+    {
+        MakeDamage(value);
+    }
+
+    private void UpdateHealth(int oldHealth, int newHealth)
+    {
+        UpdateHealth(newHealth);
+    }
+
+    private void UpdateHealth(int newHealth)
+    {
+        HealthPoints ??= new ReactiveProperty<int>(_health);
+        HealthPoints.Value = newHealth;
+    }
     }
 }

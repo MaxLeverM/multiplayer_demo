@@ -1,15 +1,16 @@
 ﻿using System;
 using Mirror;
+using UnityEngine;
 
 namespace Gameplay.Multiplayer
 {
     public class GameNetworkManager : NetworkManager
     {
-        public event Action<NetworkConnectionToClient, CreateCharacterMessage> OnCreateCharacter; 
+        public event Action<NetworkConnectionToClient, CreateCharacterMessage> OnCreateCharacter;
+        
         public override void OnStartServer()
         {
             base.OnStartServer();
-
             NetworkServer.RegisterHandler<CreateCharacterMessage>(CreateCharacter);
         }
         
