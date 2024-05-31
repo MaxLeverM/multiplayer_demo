@@ -1,13 +1,13 @@
 ﻿using System;
 using Mirror;
-using UnityEngine;
 
 namespace Gameplay.Multiplayer
 {
     public class GameNetworkManager : NetworkManager
     {
         public event Action<NetworkConnectionToClient, CreateCharacterMessage> OnCreateCharacter;
-        
+        public string NickName { get; set; } = "Player";
+
         public override void OnStartServer()
         {
             base.OnStartServer();
@@ -20,7 +20,7 @@ namespace Gameplay.Multiplayer
             
             var characterMessage = new CreateCharacterMessage
             {
-                name = "Joe Gaba Gaba",
+                name = NickName
             };
 
             NetworkClient.Send(characterMessage);
