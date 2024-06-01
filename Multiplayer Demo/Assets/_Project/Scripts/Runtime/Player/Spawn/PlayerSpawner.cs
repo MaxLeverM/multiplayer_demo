@@ -12,8 +12,8 @@ namespace Gameplay
     {
         private readonly Player.Factory _playerFactory;
         private readonly GameNetworkManager _networkManager;
-        private GameObject _playerPrefab;
         private readonly IDeathHandler<Health> _deathHandler;
+        private GameObject _playerPrefab;
 
         public PlayerSpawner(Player.Factory playerFactory, GameNetworkManager networkManager, [Inject(Id = GameInstaller.PlayerPrefabID)] GameObject playerPrefab, PlayerDeathHandler deathHandler)
         {
@@ -27,7 +27,7 @@ namespace Gameplay
         }
 
         [Server]
-        public void SpawnOnServer(NetworkConnectionToClient conn, CreateCharacterMessage message)
+        private void SpawnOnServer(NetworkConnectionToClient conn, CreateCharacterMessage message)
         {
             var player = _playerFactory.Create();
             var playerProfile = player.GetComponent<PlayerProfile>();
@@ -39,13 +39,13 @@ namespace Gameplay
                 _deathHandler.AddObject(health);
             }
         }
-        
-        public GameObject SpawnOnClient(SpawnMessage msg)
+
+        private GameObject SpawnOnClient(SpawnMessage msg)
         {
             return _playerFactory.Create().gameObject;
         }
 
-        public void UnSpawnOnClient(GameObject spawned)
+        private void UnSpawnOnClient(GameObject spawned)
         {
             Object.Destroy(spawned);
         }

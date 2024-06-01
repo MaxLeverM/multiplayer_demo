@@ -31,9 +31,4 @@ namespace Gameplay.Multiplayer
             OnCreateCharacter?.Invoke(conn, message);
         }
     }
-    
-    public struct CreateCharacterMessage : NetworkMessage
-    {
-        public string name;
-    }
 }

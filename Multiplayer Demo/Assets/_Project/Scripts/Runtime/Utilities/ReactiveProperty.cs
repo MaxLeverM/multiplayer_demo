@@ -6,7 +6,7 @@ namespace Gameplay
     public class ReactiveProperty<T>
     {
         private T _value;
-        private List<Action<T>> _listeners;
+        private readonly List<Action<T>> _listeners;
         
         public T Value
         {

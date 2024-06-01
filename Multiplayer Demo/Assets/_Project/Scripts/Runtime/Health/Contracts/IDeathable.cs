@@ -4,6 +4,6 @@ namespace Gameplay
 {
     public interface IDeathable<out T>
     {
-        public event Action<T> OnDeath;
+        event Action<T> OnDeath;
     }
 }

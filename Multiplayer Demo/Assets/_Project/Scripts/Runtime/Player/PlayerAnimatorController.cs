@@ -10,7 +10,13 @@ namespace Gameplay
         [SerializeField] private Animator _animator;
         [SerializeField] private MovementController _movementController;
 
-        private int _animIDSpeed; //рефакторинг
+        [SerializeField] private string _animSpeed = "Speed";
+        [SerializeField] private string _animGrounded = "Grounded";
+        [SerializeField] private string _animJump = "Jump";
+        [SerializeField] private string _animFreeFall = "FreeFall";
+        [SerializeField] private string _animMotionSpeed = "MotionSpeed";
+        
+        private int _animIDSpeed;
         private int _animIDGrounded;
         private int _animIDJump;
         private int _animIDFreeFall;
@@ -22,6 +28,15 @@ namespace Gameplay
             SubscribeOnMovement();
             
             SetGrounded(_movementController.IsGrounded);
+        }
+
+        private void AssignAnimationIDs()
+        {
+            _animIDSpeed = Animator.StringToHash(_animSpeed);
+            _animIDGrounded = Animator.StringToHash(_animGrounded);
+            _animIDJump = Animator.StringToHash(_animJump);
+            _animIDFreeFall = Animator.StringToHash(_animFreeFall);
+            _animIDMotionSpeed = Animator.StringToHash(_animMotionSpeed);
         }
 
         private void SubscribeOnMovement()
@@ -56,15 +71,6 @@ namespace Gameplay
         private void SetGrounded(bool isGrounded)
         {
             _animator.SetBool(_animIDGrounded, isGrounded);
-        }
-        
-        private void AssignAnimationIDs()
-        {
-            _animIDSpeed = Animator.StringToHash("Speed");
-            _animIDGrounded = Animator.StringToHash("Grounded");
-            _animIDJump = Animator.StringToHash("Jump");
-            _animIDFreeFall = Animator.StringToHash("FreeFall");
-            _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
         }
 
         public void Dispose()

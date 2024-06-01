@@ -46,7 +46,7 @@ namespace Gameplay
         public event Action<bool> OnFreeFallStateChanged;
         public event Action<float> OnAnimationBlendChanged;
         public event Action<float> OnInputMagnitudeChanged;
-
+        
 
         private Camera _mainCamera;
         private float _speed;
@@ -62,16 +62,9 @@ namespace Gameplay
         private bool _lastIsGrounded = true;
 
         public bool IsGrounded => _isGrounded;
-
         public bool InputJump { get; set; }
         public bool InputSprint { get; set; }
         public Vector2 InputMove { get; set; }
-
-        public bool CanMove
-        {
-            get => _canMove;
-            set => _canMove = value;
-        }
 
         private void Awake()
         {

@@ -1484,6 +1484,8 @@ MonoBehaviour:
   syncInterval: 0
   _animator: {fileID: 6982812146204527121}
   _movementController: {fileID: 7171684869830289425}
+  testList:
+  - PropertyName: 
 --- !u!114 &7395361011686686849
 MonoBehaviour:
   m_ObjectHideFlags: 0
